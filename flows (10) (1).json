@@ -1,0 +1,612 @@
+[
+    {
+        "id": "900f939f0d0d9da2",
+        "type": "tab",
+        "label": "Flow 3",
+        "disabled": false,
+        "info": "",
+        "env": []
+    },
+    {
+        "id": "62922b3efdfc6223",
+        "type": "inject",
+        "z": "900f939f0d0d9da2",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "30",
+        "crontab": "",
+        "once": false,
+        "onceDelay": "30",
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 230,
+        "y": 640,
+        "wires": [
+            [
+                "49c25d0b21b1073f",
+                "bbc630816340023c"
+            ]
+        ]
+    },
+    {
+        "id": "49c25d0b21b1073f",
+        "type": "random",
+        "z": "900f939f0d0d9da2",
+        "name": "Temperatura",
+        "low": "20",
+        "high": "50",
+        "inte": "true",
+        "property": "payload",
+        "x": 410,
+        "y": 560,
+        "wires": [
+            [
+                "1b85b49b981b9688",
+                "a3c8a549ca1e2b41",
+                "1a22bff9733d46c8"
+            ]
+        ]
+    },
+    {
+        "id": "bbc630816340023c",
+        "type": "random",
+        "z": "900f939f0d0d9da2",
+        "name": "Humedad",
+        "low": "30",
+        "high": "100",
+        "inte": "true",
+        "property": "payload",
+        "x": 400,
+        "y": 680,
+        "wires": [
+            [
+                "c6c627493db9a30a",
+                "4dbf21267b669b58",
+                "0edf0458d67e87c1"
+            ]
+        ]
+    },
+    {
+        "id": "1b85b49b981b9688",
+        "type": "function",
+        "z": "900f939f0d0d9da2",
+        "name": "temperatura",
+        "func": "let temp = msg.payload; // Recibe el valor del nodo random\nglobal.set(\"temperatura\", temp); // Guarda en variable global\n\nif (temp > 40) {\n    msg.payload = `Clima muy cálido (${temp}°C)`;\n} else {\n    msg.payload = `Temperatura normal (${temp}°C)`;\n}\nreturn msg;\n",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 610,
+        "y": 560,
+        "wires": [
+            [
+                "c389706bb51cc8b5"
+            ]
+        ]
+    },
+    {
+        "id": "c6c627493db9a30a",
+        "type": "function",
+        "z": "900f939f0d0d9da2",
+        "name": "humedad",
+        "func": "let hum = msg.payload; // Recibe el valor del nodo random\nglobal.set(\"humedad\", hum); // Guarda en variable global\n\nif (hum > 40) {\n    msg.payload = `Clima muy humedo (${hum}°C)`;\n} else {\n    msg.payload = `Temperatura normal (${hum}°C)`;\n}\nreturn msg;\n",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 560,
+        "y": 740,
+        "wires": [
+            [
+                "f4d5805ff7e6b581"
+            ]
+        ]
+    },
+    {
+        "id": "1a22bff9733d46c8",
+        "type": "ui_text",
+        "z": "900f939f0d0d9da2",
+        "group": "bed9a22cd1d142b8",
+        "order": 3,
+        "width": 0,
+        "height": 0,
+        "name": "",
+        "label": "temperatura",
+        "format": "{{msg.payload}}",
+        "layout": "row-left",
+        "className": "",
+        "style": false,
+        "font": "",
+        "fontSize": 16,
+        "color": "#000000",
+        "x": 570,
+        "y": 420,
+        "wires": []
+    },
+    {
+        "id": "a3c8a549ca1e2b41",
+        "type": "ui_gauge",
+        "z": "900f939f0d0d9da2",
+        "name": "",
+        "group": "bed9a22cd1d142b8",
+        "order": 2,
+        "width": 0,
+        "height": 0,
+        "gtype": "gage",
+        "title": "Temperatura",
+        "label": "units",
+        "format": "{{value}}",
+        "min": 0,
+        "max": "100",
+        "colors": [
+            "#00b500",
+            "#e6e600",
+            "#ca3838"
+        ],
+        "seg1": "",
+        "seg2": "",
+        "diff": false,
+        "className": "",
+        "x": 570,
+        "y": 480,
+        "wires": []
+    },
+    {
+        "id": "c389706bb51cc8b5",
+        "type": "ui_audio",
+        "z": "900f939f0d0d9da2",
+        "name": "",
+        "group": "bed9a22cd1d142b8",
+        "voice": "",
+        "always": "",
+        "x": 800,
+        "y": 560,
+        "wires": []
+    },
+    {
+        "id": "1337146ab8e7953f",
+        "type": "function",
+        "z": "900f939f0d0d9da2",
+        "name": "Mostrar",
+        "func": "let temp = global.get(\"temperatura\") || \"No disponible\";\nlet now = new Date();\nlet hora = now.toLocaleTimeString(\"es-ES\");\n\nnode.warn(`Temperatura: ${temp}°C, Hora: ${hora}`); // Muestra en la consola\n\n msg.payload = {\n     chatId: msg.payload.chatId, // Mantiene el Chat ID para la respuesta\n     type: \"message\",\n     content: `La temperatura es: ${temp}°C, y la hora es: ${hora}.`\n };\n return msg;\n",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 500,
+        "y": 820,
+        "wires": [
+            [
+                "5b176cdea3b3c96e"
+            ]
+        ]
+    },
+    {
+        "id": "4dbf21267b669b58",
+        "type": "ui_text",
+        "z": "900f939f0d0d9da2",
+        "group": "bed9a22cd1d142b8",
+        "order": 3,
+        "width": 0,
+        "height": 0,
+        "name": "",
+        "label": "humedad",
+        "format": "{{msg.payload}}",
+        "layout": "row-left",
+        "className": "",
+        "style": false,
+        "font": "",
+        "fontSize": 16,
+        "color": "#000000",
+        "x": 580,
+        "y": 640,
+        "wires": []
+    },
+    {
+        "id": "0edf0458d67e87c1",
+        "type": "ui_gauge",
+        "z": "900f939f0d0d9da2",
+        "name": "",
+        "group": "bed9a22cd1d142b8",
+        "order": 2,
+        "width": 0,
+        "height": 0,
+        "gtype": "gage",
+        "title": "Humedad",
+        "label": "units",
+        "format": "{{value}}",
+        "min": 0,
+        "max": "100",
+        "colors": [
+            "#00b500",
+            "#e6e600",
+            "#ca3838"
+        ],
+        "seg1": "",
+        "seg2": "",
+        "diff": false,
+        "className": "",
+        "x": 580,
+        "y": 680,
+        "wires": []
+    },
+    {
+        "id": "f4d5805ff7e6b581",
+        "type": "ui_audio",
+        "z": "900f939f0d0d9da2",
+        "name": "",
+        "group": "bed9a22cd1d142b8",
+        "voice": "",
+        "always": "",
+        "x": 760,
+        "y": 740,
+        "wires": []
+    },
+    {
+        "id": "f1ebba54929660d6",
+        "type": "function",
+        "z": "900f939f0d0d9da2",
+        "name": "Mostrar",
+        "func": "let hum = global.get(\"humedad\") || \"No disposible\";\nlet now = new Date();\nlet hora = now.toLocaleTimeString(\"es-ES\");\n\nnode.warn(`Humedad: ${hum}°C, Hora: ${hora}`); // Muestra en la consola\n\n msg.payload = {\n     chatId: msg.payload.chatId, // Mantiene el Chat ID para la respuesta\n     type: \"message\",\n     content: `La humedad es: ${hum}, y la hora es: ${hora}`\n };\n return msg;\n",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 500,
+        "y": 900,
+        "wires": [
+            [
+                "d11cc060cb469b81"
+            ]
+        ]
+    },
+    {
+        "id": "d11cc060cb469b81",
+        "type": "telegram sender",
+        "z": "900f939f0d0d9da2",
+        "name": "",
+        "bot": "3ef6d052beb962b9",
+        "haserroroutput": false,
+        "outputs": 1,
+        "x": 830,
+        "y": 920,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "214063fa84d3c52a",
+        "type": "inject",
+        "z": "900f939f0d0d9da2",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "",
+        "payloadType": "str",
+        "x": 210,
+        "y": 1120,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "d4445b648d65a3f1",
+        "type": "function",
+        "z": "900f939f0d0d9da2",
+        "name": "function 13",
+        "func": "// Obtener el mensaje o los datos recibidos de Telegram\nlet mensaje = msg.payload.content;\nlet chatId = \"1742316908483\";\n\n// Verificar si el mensaje es \"camara\"\nif (mensaje.toLowerCase() === \"camara\") {\n    // Indicar que se debe capturar una imagen\n    msg.capture = true; // Agregar un indicador para activar la cámara\n    msg.chatId = \"1742316908483\"; // Pasar el ID del chat para usarlo más adelante\n    return msg; // Continúa al nodo de la cámara\n} else {\n    // Respuesta para comandos no reconocidos\n    msg.payload = {\n        chatId: \"1742316908483\",\n        type: \"message\",\n        content: \"Comando no reconocido. Intenta con 'camara'.\"\n    };\n   \n    return msg;\n    \n}\n",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 460,
+        "y": 1100,
+        "wires": [
+            [
+                "5e283320bb678241"
+            ]
+        ]
+    },
+    {
+        "id": "5e283320bb678241",
+        "type": "ui_webcam",
+        "z": "900f939f0d0d9da2",
+        "name": "",
+        "group": "bed9a22cd1d142b8",
+        "order": 14,
+        "width": "5",
+        "height": "5",
+        "countdown": false,
+        "autoStart": true,
+        "hideCaptureButton": true,
+        "showImage": "2",
+        "mirror": true,
+        "format": "png",
+        "x": 600,
+        "y": 1200,
+        "wires": [
+            [
+                "99b8c06b1169771b",
+                "052886d3309498c6"
+            ]
+        ]
+    },
+    {
+        "id": "99b8c06b1169771b",
+        "type": "debug",
+        "z": "900f939f0d0d9da2",
+        "name": "debug 74",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 860,
+        "y": 1180,
+        "wires": []
+    },
+    {
+        "id": "052886d3309498c6",
+        "type": "function",
+        "z": "900f939f0d0d9da2",
+        "name": "function 14",
+        "func": "msg.payload = {\n    chatId: \"1742316673701\",\n    type: 'photo',\n    content: msg.payload\n};\nreturn msg;\n",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 750,
+        "y": 1100,
+        "wires": [
+            [
+                "94c274e2d038c860"
+            ]
+        ]
+    },
+    {
+        "id": "fd620dc07b85ed7a",
+        "type": "inject",
+        "z": "900f939f0d0d9da2",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 380,
+        "y": 980,
+        "wires": [
+            [
+                "e3155ae9e676e984"
+            ]
+        ]
+    },
+    {
+        "id": "e3155ae9e676e984",
+        "type": "debug",
+        "z": "900f939f0d0d9da2",
+        "name": "debug 5",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 600,
+        "y": 980,
+        "wires": []
+    },
+    {
+        "id": "577f0c83ea48a91d",
+        "type": "debug",
+        "z": "900f939f0d0d9da2",
+        "name": "debug 6",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 480,
+        "y": 1320,
+        "wires": []
+    },
+    {
+        "id": "5b176cdea3b3c96e",
+        "type": "telegram sender",
+        "z": "900f939f0d0d9da2",
+        "name": "",
+        "bot": "3ef6d052beb962b9",
+        "haserroroutput": false,
+        "outputs": 1,
+        "x": 770,
+        "y": 840,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "f385e21d11ca8211",
+        "type": "telegram command",
+        "z": "900f939f0d0d9da2",
+        "name": "",
+        "command": "/temperatura",
+        "description": "",
+        "registercommand": false,
+        "language": "",
+        "scope": "default",
+        "bot": "3ef6d052beb962b9",
+        "strict": false,
+        "hasresponse": true,
+        "useregex": false,
+        "removeregexcommand": false,
+        "outputs": 2,
+        "x": 230,
+        "y": 820,
+        "wires": [
+            [
+                "1337146ab8e7953f"
+            ],
+            []
+        ]
+    },
+    {
+        "id": "a23f056e123c9fd1",
+        "type": "telegram command",
+        "z": "900f939f0d0d9da2",
+        "name": "",
+        "command": "/humedad",
+        "description": "",
+        "registercommand": false,
+        "language": "",
+        "scope": "default",
+        "bot": "3ef6d052beb962b9",
+        "strict": false,
+        "hasresponse": true,
+        "useregex": false,
+        "removeregexcommand": false,
+        "outputs": 2,
+        "x": 220,
+        "y": 900,
+        "wires": [
+            [
+                "f1ebba54929660d6"
+            ],
+            []
+        ]
+    },
+    {
+        "id": "02e87c89bdc81d9d",
+        "type": "telegram command",
+        "z": "900f939f0d0d9da2",
+        "name": "",
+        "command": "/camara",
+        "description": "",
+        "registercommand": false,
+        "language": "",
+        "scope": "default",
+        "bot": "3ef6d052beb962b9",
+        "strict": false,
+        "hasresponse": true,
+        "useregex": false,
+        "removeregexcommand": false,
+        "outputs": 2,
+        "x": 240,
+        "y": 1240,
+        "wires": [
+            [
+                "d4445b648d65a3f1"
+            ],
+            []
+        ]
+    },
+    {
+        "id": "94c274e2d038c860",
+        "type": "telegram sender",
+        "z": "900f939f0d0d9da2",
+        "name": "",
+        "bot": "3ef6d052beb962b9",
+        "haserroroutput": false,
+        "outputs": 1,
+        "x": 970,
+        "y": 1080,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "bed9a22cd1d142b8",
+        "type": "ui_group",
+        "name": "Hum/Temperatura",
+        "tab": "7157127c01ad1549",
+        "order": 1,
+        "disp": true,
+        "width": 6,
+        "collapse": false,
+        "className": ""
+    },
+    {
+        "id": "3ef6d052beb962b9",
+        "type": "telegram bot",
+        "botname": "Rafa_iot_bot",
+        "usernames": "",
+        "chatids": "",
+        "baseapiurl": "",
+        "testenvironment": false,
+        "updatemode": "polling",
+        "pollinterval": 300,
+        "usesocks": false,
+        "sockshost": "",
+        "socksprotocol": "socks5",
+        "socksport": 6667,
+        "socksusername": "anonymous",
+        "sockspassword": "",
+        "bothost": "",
+        "botpath": "",
+        "localbothost": "0.0.0.0",
+        "localbotport": 8443,
+        "publicbotport": 8443,
+        "privatekey": "",
+        "certificate": "",
+        "useselfsignedcertificate": false,
+        "sslterminated": false,
+        "verboselogging": false
+    },
+    {
+        "id": "7157127c01ad1549",
+        "type": "ui_tab",
+        "name": "TM",
+        "icon": "dashboard",
+        "disabled": false,
+        "hidden": false
+    }
+]
