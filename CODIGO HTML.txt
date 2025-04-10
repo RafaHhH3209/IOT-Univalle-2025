@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Monitor de Sensores</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+        }
+    
+        .container {
+            width: 80%;
+            margin: auto;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+    
+        h1 {
+            color: #333;
+        }
+    
+        .sensor-container {
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+            margin-top: 20px;
+        }
+    
+        .sensor {
+            width: 40%; /* Reducir el ancho al 40% */
+            max-width: 400px; /* Ancho máximo para evitar que sea demasiado grande */
+            padding: 10px;
+            background: #fff;
+            border-radius: 5px;
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+        }
+    
+        canvas {
+            width: 100% !important;
+            height: 200px !important; /* Altura fija para reducir el tamaño */
+        }
+    </style>
+    
+</head>
+
+<body>
+    <div class="container">
+        <h1>Monitor de Sensores</h1>
+        <div class="sensor-container">
+            <div class="sensor">
+                <h2>Temperatura</h2>
+                <canvas id="chartTemperatura"></canvas>
+            </div>
+            <div class="sensor">
+                <h2>Humedad</h2>
+                <canvas id="chartHumedad"></canvas>
+            </div>
+            <div class="sensor">
+                <h2>Humedad del Suelo</h2>
+                <canvas id="chartHumedadSuelo"></canvas>
+            </div>
+            <div class="sensor">
+                <h2>Gas</h2>
+                <canvas id="chartGas"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-app.js";
+        import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-database.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyCufJ...",
+            authDomain: "fir-temphumgas.firebaseapp.com",
+            databaseURL: "https://fir-temphumgas-default-rtdb.firebaseio.com",
+            projectId: "fir-temphumgas",
+            storageBucket: "fir-temphumgas.firebasestorage.app",
+            messagingSenderId: "743969157528",
+            appId: "1:743969157528:web:d53ff41a6c18aad7d57bed"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const database = getDatabase(app);
+
+        const crearGrafico = (idCanvas, label, color) => {
+            const ctx = document.getElementById(idCanvas).getContext('2d');
+            return new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: [],
+                    datasets: [{
+                        label: label,
+                        data: [],
+                        borderColor: color,
+                        borderWidth: 2,
+                        backgroundColor: color,
+                        pointRadius: 6, // Tamaño de los puntos
+                        pointBackgroundColor: color,
+                        pointBorderColor: "black", // Bordes negros para los puntos
+                        pointBorderWidth: 2,
+                        fill: false,
+                        tension: 0.3
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    animation: {
+                        duration: 500,
+                        easing: 'easeInOutQuad'
+                    },
+                    scales: {
+                        x: {
+                            title: { display: true, text: 'Hora' },
+                            ticks: {
+                                autoSkip: true,
+                                maxTicksLimit: 10
+                            }
+                        },
+                        y: {
+                            title: { display: true, text: label },
+                            suggestedMin: 1,
+                            suggestedMax: 3000
+                        }
+                    },
+                    plugins: {
+                        tooltip: {
+                            callbacks: {
+                                label: (context) => {
+                                    return `${context.dataset.label}: ${context.raw}`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        };
+
+        const graficos = {
+            Temperatura: crearGrafico('chartTemperatura', 'Temperatura (°C)', 'red'),
+            Humedad: crearGrafico('chartHumedad', 'Humedad (%)', 'blue'),
+            HumedadSuelo: crearGrafico('chartHumedadSuelo', 'Humedad del Suelo (%)', 'green'),
+            Gas: crearGrafico('chartGas', 'Gas (ppm)', 'purple')
+        };
+
+        const actualizarGrafico = (grafico, valor) => {
+            const ahora = new Date().toLocaleTimeString();
+            if (grafico.data.labels.length >= 20) {
+                grafico.data.labels.shift();
+                grafico.data.datasets[0].data.shift();
+            }
+            grafico.data.labels.push(ahora);
+            grafico.data.datasets[0].data.push(valor);
+            grafico.update();
+        };
+
+        Object.keys(graficos).forEach(sensor => {
+            const referencia = ref(database, sensor);
+            onValue(referencia, (snapshot) => {
+                const valor = snapshot.val();
+                if (valor !== null && valor !== undefined) {
+                    actualizarGrafico(graficos[sensor], valor);
+                }
+            });
+        });
+
+    </script>
+</body>
+
+</html>
